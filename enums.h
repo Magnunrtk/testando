@@ -20,6 +20,14 @@
 #ifndef FS_ENUMS_H_003445999FEE4A67BCECBE918B0124CE
 #define FS_ENUMS_H_003445999FEE4A67BCECBE918B0124CE
 
+enum ItemRarity_t : uint8_t {
+	ITEM_RARITY_NONE = 0,
+	ITEM_RARITY_COMMON,
+	ITEM_RARITY_RARE,
+	ITEM_RARITY_EPIC,
+	ITEM_RARITY_LEGENDARY
+};
+
 enum RuleViolationType_t : uint8_t {
 	REPORT_TYPE_NAME = 0,
 	REPORT_TYPE_STATEMENT = 1,
@@ -99,12 +107,18 @@ enum itemAttrTypes : uint32_t {
 
 enum VipStatus_t : uint8_t {
 	VIPSTATUS_OFFLINE = 0,
-	VIPSTATUS_ONLINE = 1
+	VIPSTATUS_ONLINE = 1,
+	VIPSTATUS_PENDING = 2
 };
 
 enum MarketAction_t {
 	MARKETACTION_BUY = 0,
 	MARKETACTION_SELL = 1,
+};
+
+enum MarketRequest_t {
+	MARKETREQUEST_OWN_OFFERS = 0xFFFE,
+	MARKETREQUEST_OWN_HISTORY = 0xFFFF,
 };
 
 enum MarketOfferState_t {
@@ -141,7 +155,7 @@ enum OperatingSystem_t : uint8_t {
 	CLIENTOS_OTCLIENT_LINUX = 10,
 	CLIENTOS_OTCLIENT_WINDOWS = 11,
 	CLIENTOS_OTCLIENT_MAC = 12,
-	
+
 	// by default OTCv8 uses CLIENTOS_WINDOWS for backward compatibility
 	// for correct value enable g_game.enableFeature(GameExtendedOpcode)
 	// in modules/game_features/features.lua
@@ -362,7 +376,9 @@ enum ConditionType_t {
 	CONDITION_CURSED = 1 << 22,
 	CONDITION_EXHAUST_COMBAT = 1 << 23, // unused
 	CONDITION_EXHAUST_HEAL = 1 << 24, // unused
-	CONDITION_PACIFIED = 1 << 25
+	CONDITION_PACIFIED = 1 << 25,
+	CONDITION_SPELLCOOLDOWN = 1 << 26,
+	CONDITION_SPELLGROUPCOOLDOWN = 1 << 27,
 };
 
 enum ConditionId_t : int8_t {
@@ -464,8 +480,18 @@ enum ReturnValue {
 	RETURNVALUE_TRADEPLAYERHIGHESTBIDDER,
 	RETURNVALUE_YOUCANNOTTRADETHISHOUSE,
 	RETURNVALUE_YOUDONTHAVEREQUIREDPROFESSION,
+	RETURNVALUE_CANNOTMOVEITEMISNOTSTOREITEM,
 	RETURNVALUE_ITEMCANNOTBEMOVEDTHERE,
 	RETURNVALUE_YOUCANNOTUSETHISBED,
+};
+
+enum SpeechBubble_t
+{
+	SPEECHBUBBLE_NONE = 0,
+	SPEECHBUBBLE_NORMAL = 1,
+	SPEECHBUBBLE_TRADE = 2,
+	SPEECHBUBBLE_QUEST = 3,
+	SPEECHBUBBLE_QUESTTRADER = 4,
 };
 
 enum MapMark_t
@@ -552,7 +578,6 @@ struct MarketOfferEx {
 	std::string playerName;
 };
 
-
 struct HistoryMarketOffer {
 	uint32_t timestamp;
 	uint32_t price;
@@ -576,7 +601,7 @@ struct ModalWindow
 	uint8_t defaultEnterButton = 0xFF, defaultEscapeButton = 0xFF;
 	bool priority = false;
 
-	ModalWindow(uint32_t id, std::string title, std::string message) : title(std::move(title)), message(std::move(message)), id(id) {}
+	ModalWindow(uint32_t id, std::string title, std::string message): title(std::move(title)), message(std::move(message)), id(id) {}
 };
 
 enum CombatOrigin
@@ -587,7 +612,6 @@ enum CombatOrigin
 	ORIGIN_MELEE,
 	ORIGIN_RANGED,
 	ORIGIN_WAND,
-	ORIGIN_REFLECT,
 };
 
 struct CombatDamage
@@ -603,6 +627,8 @@ struct CombatDamage
 	bool leeched = false;
 };
 
+using MarketOfferList = std::list<MarketOffer>;
+using HistoryMarketOfferList = std::list<HistoryMarketOffer>;
 using ShopInfoList = std::list<ShopInfo>;
 
 enum MonstersEvent_t : uint8_t {
@@ -612,20 +638,6 @@ enum MonstersEvent_t : uint8_t {
 	MONSTERS_EVENT_DISAPPEAR = 3,
 	MONSTERS_EVENT_MOVE = 4,
 	MONSTERS_EVENT_SAY = 5,
-};
-
-struct Reflect {
-	Reflect() = default;
-	Reflect(uint16_t percent, uint16_t chance) : percent(percent), chance(chance) {};
-
-	Reflect& operator+=(const Reflect& other) {
-		percent += other.percent;
-		chance = std::min(100, chance + other.chance);
-		return *this;
-	}
-
-	uint16_t percent = 0;
-	uint16_t chance = 0;
 };
 
 #endif
