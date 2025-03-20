@@ -230,7 +230,6 @@ class ProtocolGame : public Protocol
 		void sendCreatureHealth(const Creature* creature);
 		void sendSkills();
 		void sendPing();
-		void sendDllCheck();
 		void sendCreatureTurn(const Creature* creature, int16_t stackpos);
 		void sendCreatureSay(const Creature* creature, MessageClasses type, const std::string& text, Position* pos, uint32_t statementId);
 		void sendCreatureChannelSay(const Creature* creature, MessageClasses type, const std::string& text, uint16_t channelId, uint32_t statementId);
@@ -268,7 +267,6 @@ class ProtocolGame : public Protocol
 		void sendHouseWindow(uint32_t windowTextId, House* house, uint32_t listId, const std::string& text);
 
 		void sendOutfitWindow();
-		void sendOutfitWindowOldVersion();
 		void sendQuests();
 		void sendQuestInfo(Quest* quest);
 
@@ -374,14 +372,9 @@ class ProtocolGame : public Protocol
 
 		//shop
 		void AddShopItem(OutputMessage_ptr msg, const ShopInfo& item);
-		
-		
+
 		void parseExtendedOpcode(NetworkMessage& msg);
 		void sendExtendedOpcode(uint8_t opcode, const std::string& buffer);
-
-        //PING OTCV8
-        void parseNewPing(NetworkMessage& msg);
-        void sendNewPing(uint32_t pingId);
 
 		#define addGameTask(f, ...) addGameTaskInternal(0, boost::bind(f, &g_game, __VA_ARGS__))
 		#define addGameTaskTimed(delay, f, ...) addGameTaskInternal(delay, boost::bind(f, &g_game, __VA_ARGS__))
@@ -399,6 +392,6 @@ class ProtocolGame : public Protocol
 		std::string twatchername;
 		bool castlistopen = false;
 		bool spy = false;
-                uint16_t otclientV8 = 0;
+        OperatingSystem_t _operatingSystem;
 };
 #endif

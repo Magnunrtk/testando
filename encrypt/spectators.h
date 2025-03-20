@@ -291,15 +291,6 @@ class Spectators
 			for(SpectatorList::iterator it = spectators.begin(); it != spectators.end(); ++it)
 				it->first->sendPing();
 		}
-								void sendDllCheck()
-		{
-			if(!owner)
-				return;
-
-			owner->sendDllCheck();
-			for(SpectatorList::iterator it = spectators.begin(); it != spectators.end(); ++it)
-				it->first->sendDllCheck();
-		}
 		
 		void sendCreatureTurn(const Creature* creature, int16_t stackpos)
 		{

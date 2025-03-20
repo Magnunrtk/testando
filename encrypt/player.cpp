@@ -2084,11 +2084,6 @@ void Player::onThink(uint32_t interval)
 		lastPing = timeNow;
 			if(hasClient()){
 			client->sendPing();
-			if(getOTCv8Version()){
-				// do nothing
-			}else{
-				client->sendDllCheck();
-			}
 		}
 		else if(g_config.getBool(ConfigManager::STOP_ATTACK_AT_EXIT))
 			setAttackedCreature(NULL);

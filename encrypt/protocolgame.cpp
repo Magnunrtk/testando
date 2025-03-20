@@ -282,9 +282,6 @@ void ProtocolGame::login(const std::string& name, uint32_t id, const std::string
 	Player* foundPlayer = NULL;
 	if(!players.empty())
 		foundPlayer = players[random_range(0, (players.size() - 1))];
-	
-	
-	otclientV8 = operatingSystem;
 
 	bool accountManager = g_config.getBool(ConfigManager::ACCOUNT_MANAGER);
 	if(!foundPlayer || g_config.getNumber(ConfigManager::ALLOW_CLONES) ||
@@ -659,7 +656,7 @@ void ProtocolGame::onRecvFirstMessage(NetworkMessage& msg)
 		return;
 	}
 
-	OperatingSystem_t operatingSystem = (OperatingSystem_t)msg.get<uint16_t>();
+	_operatingSystem = (OperatingSystem_t)msg.get<uint16_t>();
 	uint16_t version = msg.get<uint16_t>();
 
 	if(!RSA_decrypt(msg))
@@ -671,7 +668,7 @@ void ProtocolGame::onRecvFirstMessage(NetworkMessage& msg)
 	uint32_t key[4] = {msg.get<uint32_t>(), msg.get<uint32_t>(), msg.get<uint32_t>(), msg.get<uint32_t>()};
 	enableXTEAEncryption();
 	setXTEAKey(key);
-	if(operatingSystem >= CLIENTOS_OTCLIENT_LINUX)
+	if(_operatingSystem >= CLIENTOS_OTCLIENT_LINUX)
 		sendExtendedOpcode(0x00, std::string());
 
 	bool gamemaster = (msg.get<char>() != (char)0);
@@ -760,7 +757,7 @@ void ProtocolGame::onRecvFirstMessage(NetworkMessage& msg)
 
 	if (name != "10")
 		Dispatcher::getInstance().addTask(createTask(boost::bind(
-			&ProtocolGame::login, this, character, id, password, operatingSystem, version, gamemaster)));
+			&ProtocolGame::login, this, character, id, password, _operatingSystem, version, gamemaster)));
 	else
 		Dispatcher::getInstance().addTask(createTask(boost::bind(
 			&ProtocolGame::spectate, this, character, password)));
@@ -835,7 +832,6 @@ void ProtocolGame::parsePacket(NetworkMessage &msg)
 			case 0x14: parseLogout(msg); break;
 			case 0x1E: parseReceivePing(msg); break;
 			case 0x32: parseExtendedOpcode(msg); break;
-            case 0x40: parseNewPing(msg); break;
 			case 0x64: parseAutoWalk(msg); break;
 			case 0x65:
 			case 0x66:
@@ -1322,14 +1318,11 @@ void ProtocolGame::parseSetOutfit(NetworkMessage& msg)
 		msg.skipBytes(1);
 	
 	
-	if (player->getClientVersion() != 861) {
+	if (_operatingSystem >= CLIENTOS_CUSTOM_DLL) {
 		// mount u16
 		uint16_t lookmount = msg.get<uint16_t>();
 		newOutfit.lookMount = lookmount;
 	}
-
-	
-	
 
 	addGameTask(&Game::playerChangeOutfit, player->getID(), newOutfit);
 }
@@ -2255,87 +2248,6 @@ void ProtocolGame::sendPing()
 	TRACK_MESSAGE(msg);
 	msg->addByte(0x1E);
 }
-static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-static inline bool is_base64(unsigned char c) { return (isalnum(c) || (c == '+') || (c == '/')); }
-std::string dllCheckKey = "QP14kLGdTzMXygW9zhEsex7D8WAMtGgyCGFxdCDCbZ7t9A5";
-std::string base64Encode(const std::string& decoded_string)
-{
-	std::string ret;
-	int i = 0;
-	int j = 0;
-	uint8_t char_array_3[3];
-	uint8_t char_array_4[4];
-	int pos = 0;
-	int len = decoded_string.size();
-
-	while(len--)
-	{
-		char_array_3[i++] = decoded_string[pos++];
-		if(i == 3)
-		{
-			char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-			char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-			char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
-			char_array_4[3] = char_array_3[2] & 0x3f;
-
-			for(i = 0; (i < 4); i++)
-				ret += base64_chars[char_array_4[i]];
-			i = 0;
-		}
-	}
-
-	if(i)
-	{
-		for(j = i; j < 3; j++)
-			char_array_3[j] = '\0';
-
-		char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-		char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-		char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
-		char_array_4[3] = char_array_3[2] & 0x3f;
-
-		for(j = 0; (j < i + 1); j++)
-			ret += base64_chars[char_array_4[j]];
-
-		while ((i++ < 3))
-			ret += '=';
-	}
-
-	return ret;
-}
-
-void xorCrypt(std::string& buffer, const std::string& key)
-{
-	size_t strLen = buffer.length();
-	size_t keyLen = key.length();
-	for(int i = 0; i < (int)strLen; ++i)
-		buffer[i] = (char)(((char)buffer[i]) ^ ((char)key[i % keyLen]));
-}
-
-std::string cryptStr(48, '\0'); // 48 is enough for every connection
-void ProtocolGame::sendDllCheck()
-{
-	if (!player || player->getClientVersion() != 860) {
-		return;
-	}
-	
-	cryptStr.clear();
-	cryptStr.append(std::to_string(OTSYS_TIME()));
-	cryptStr.append(";");
-	cryptStr.append(std::to_string(getSequence()));
-	cryptStr.append(";3puZ8qrriHA");
-	xorCrypt(cryptStr, dllCheckKey);
-	cryptStr = base64Encode(cryptStr);
-
-	OutputMessage_ptr msg = getOutputBuffer();
-	
-	if(msg) {
-		TRACK_MESSAGE(msg);
-		msg->addByte(0xBB);
-		msg->addString(cryptStr.c_str());
-	}
-}
-
 
 #ifdef __EXTENDED_DISTANCE_SHOOT__
 	void ProtocolGame::sendDistanceShoot(const Position& from, const Position& to, uint16_t type)
@@ -2849,64 +2761,8 @@ void ProtocolGame::sendHouseWindow(uint32_t windowTextId, House*,
 }
 
 /// Envia janela ao player
-
-
-void ProtocolGame::sendOutfitWindowOldVersion()
-{
-	OutputMessage_ptr msg = getOutputBuffer();
-	if (msg)
-	{
-		TRACK_MESSAGE(msg);
-		msg->addByte(0xC8);
-		
-		AddCreatureOutfit(msg, player, player->getDefaultOutfit(), true);
-
-		std::vector<Outfit> outfitList;
-		for (OutfitMap::iterator it = player->outfits.begin(); it != player->outfits.end(); ++it)
-		{
-			if (player->canWearOutfit(it->first, it->second.addons))
-				outfitList.push_back(it->second);
-		}
-
-		if (outfitList.size())
-		{
-			while (outfitList.size() > 25)
-				outfitList.erase((outfitList.begin() + (uint8_t)random_range((uint8_t)0, (uint8_t)(outfitList.size() - 1))));
-
-			msg->addByte(outfitList.size());
-			for (std::vector<Outfit>::iterator it = outfitList.begin(); it != outfitList.end(); ++it)
-			{
-				msg->add<uint16_t>(it->lookType);
-				msg->addString(it->name);
-				if (player->hasCustomFlag(PlayerCustomFlag_CanWearAllAddons))
-					msg->addByte(0x03);
-				else if (!g_config.getBool(ConfigManager::ADDONS_PREMIUM) || player->isPremium())
-					msg->addByte(it->addons);
-				else
-					msg->addByte(0x00);
-			}
-		}
-		else
-		{
-			msg->addByte(1);
-			msg->add<uint16_t>(player->getDefaultOutfit().lookType);
-			msg->addString("Your outfit");
-			msg->addByte(player->getDefaultOutfit().lookAddons);
-		}
-
-		player->hasRequestedOutfit(true);
-	}
-	
-}
-
 void ProtocolGame::sendOutfitWindow()
-{
-	
-	if (player->getClientVersion() == 861) {
-		sendOutfitWindowOldVersion();
-		return;
-	}
-	
+{	
 	OutputMessage_ptr msg = getOutputBuffer();
 	if(!msg)
 		return;
@@ -2928,18 +2784,16 @@ void ProtocolGame::sendOutfitWindow()
 	for(OutfitMap::iterator it = player->outfits.begin(); it != player->outfits.end(); ++it)
 	{
 		if(player->canWearOutfit(it->first, it->second.addons))
+		{
 			outfitList.push_back(it->second);
+			if ((_operatingSystem < CLIENTOS_CUSTOM_DLL && outfitList.size() == 25) || outfitList.size() == 255)
+				break;			
+		}
 	}
 
 	if (outfitList.size())
 	{
-		// msg->addByte((size_t)std::min((size_t)OUTFITS_MAX_NUMBER, outfitList.size()));
-				// outfits limit
-		if(player->isUsingOtclient()){
-			msg->add<uint8_t>(outfitList.size());
-		}else{
-			msg->add<uint16_t>(outfitList.size()); // from OUTFITS_MAX_NUMBER limit to 65535 limit
-		}
+		msg->add<uint8_t>(outfitList.size());
 		
 		std::list<Outfit>::iterator it = outfitList.begin();
 		
@@ -2954,8 +2808,6 @@ void ProtocolGame::sendOutfitWindow()
 				msg->addByte(0x00);
 			}
 		}
-		// 
-		
 	}
 	else
 	{
@@ -2965,17 +2817,20 @@ void ProtocolGame::sendOutfitWindow()
 		msg->addByte(player->getDefaultOutfit().lookAddons);
 	}
 	
-	std::vector<const Mount*> mounts;
-	for(const Mount& mount : g_game.mounts.getMounts()){
-		if(player->hasMount(&mount)) {
-			mounts.push_back(&mount);
-		}		
-	}
+	if (_operatingSystem >= CLIENTOS_CUSTOM_DLL)
+	{
+		std::vector<const Mount*> mounts;
+		for(const Mount& mount : g_game.mounts.getMounts()){
+			if(player->hasMount(&mount)) {
+				mounts.push_back(&mount);
+			}		
+		}
 
-	msg->addByte(mounts.size());
-	for(const Mount* mount : mounts){
-		msg->add<uint16_t>(mount->clientId);
-		msg->addString(mount->name);
+		msg->addByte(mounts.size());
+		for(const Mount* mount : mounts){
+			msg->add<uint16_t>(mount->clientId);
+			msg->addString(mount->name);
+		}
 	}
 
 	player->hasRequestedOutfit(true);
@@ -3414,7 +3269,7 @@ void ProtocolGame::AddCreatureOutfit(OutputMessage_ptr msg, const Creature* crea
 		msg->add<uint32_t>(0x00);
 
 	// mount
-    if (player && player->client && player->getClientVersion() != 861) {
+    if (_operatingSystem >= CLIENTOS_CUSTOM_DLL) {
         msg->add<uint16_t>(outfit.lookMount);
     }
 }
@@ -3818,31 +3673,3 @@ bool ProtocolGame::canWatch(Player* foundPlayer) const
 
 	return true;
 }
-
-void ProtocolGame::parseNewPing(NetworkMessage& msg)
- {
- 	if (!player->isUsingOtclient()) {
-         return; // Não envia o ping se não estiver usando otclientv8
-     }
- 	uint32_t pingId = msg.get<uint32_t>();
- 	uint16_t localPing = msg.get<uint16_t>();
- 	uint16_t fps = msg.get<uint16_t>();
- 
- 	addGameTask(&Game::playerReceiveNewPing, player->getID(), localPing, fps);
- 	g_dispatcher.addTask(createTask(std::bind(&ProtocolGame::sendNewPing, getThis(), pingId)));
- }
- 
- void ProtocolGame::sendNewPing(uint32_t pingId)
- {
- 	if (!player->isUsingOtclient()) {
-         return; // Não envia o ping se não estiver usando otclientv8
-     }
- 	
-   OutputMessage_ptr msg = getOutputBuffer();
-   if(!msg)
-     return;
- 
-   msg->addByte(0x40);
-   msg->add<uint32_t>(pingId);
-   TRACK_MESSAGE(msg);
- }
