@@ -1,6 +1,6 @@
 /**
  * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
+ * Copyright (C) 2017  Mark Samman <mark.samman@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #ifndef FS_CONST_H_0A49B5996F074465BF44B90F4F780E8B
 #define FS_CONST_H_0A49B5996F074465BF44B90F4F780E8B
 
-static constexpr int32_t NETWORKMESSAGE_MAXSIZE = 65500;
+static constexpr int32_t NETWORKMESSAGE_MAXSIZE = 24590;
 
 enum MagicEffectClasses : uint8_t {
 	CONST_ME_NONE,
@@ -94,9 +94,8 @@ enum MagicEffectClasses : uint8_t {
 	CONST_ME_BATS = 67,
 	CONST_ME_SMOKE = 68,
 	CONST_ME_INSECTS = 69,
-	CONST_ME_DRAGONHEAD = 70,
-	//New Effect Include
-	CONST_ME_ORCSHAMAN = 71,
+    CONST_ME_DRAGONHEAD= 70,
+    CONST_ME_ORCSHAMAN = 71,
 	CONST_ME_ORCSHAMAN_FIRE = 72,
 	CONST_ME_THUNDER = 73,
 	CONST_ME_FERUMBRAS = 74,
@@ -109,11 +108,12 @@ enum MagicEffectClasses : uint8_t {
 	CONST_ME_YELLOWSMOKE = 168,
 	CONST_ME_GREENSMOKE = 169,
 	CONST_ME_PURPLESMOKE = 170,
-	CONST_ME_LIGHTNING = 171,
-	CONST_ME_RAGIAZ_BONE_CAPSULE = 172,
-	CONST_ME_CRITICAL_HIT = 173,
+	CONST_ME_EARLY_THUNDER = 171,
+	CONST_ME_RAGIAZ_BONECAPSULE = 172,
+	CONST_ME_CRITICAL_DAMAGE = 173,
 	// 174 is empty
 	CONST_ME_PLUNGING_FISH = 175,
+
 	CONST_ME_BLUE_ENERGY_SPARK = 176,
 	CONST_ME_ORANGE_ENERGY_SPARK = 177,
 	CONST_ME_GREEN_ENERGY_SPARK = 178,
@@ -138,49 +138,8 @@ enum MagicEffectClasses : uint8_t {
 	CONST_ME_ORANGE_FIREWORKS = 197,
 	CONST_ME_PINK_FIREWORKS = 198,
 	CONST_ME_BLUE_FIREWORKS = 199,
-	CONST_ME_SUPREME_CUBE = 201,
-	CONST_ME_BLACK_BLOOD = 202,
-	CONST_ME_PRISMATIC_SPARK = 203,
-	CONST_ME_THAIAN = 204,
-	CONST_ME_THAIAN_GHOST = 205,
-	CONST_ME_GHOST_SMOKE = 206,
-	// 207 is empty
-	CONST_ME_WATER_BLOCK_FLOATING = 208,
-	CONST_ME_WATER_BLOCK = 209,
-	CONST_ME_ROOTS = 210,
-	// 211-212 is empty
-	CONST_ME_GHOSTLY_SCRATCH = 213,
-	CONST_ME_GHOSTLY_BITE = 214,
-	CONST_ME_BIG_SCRATCH = 215,
-	CONST_ME_SLASH = 216,
-	CONST_ME_BITE = 217,
-	// 218 empty or debug
-	CONST_ME_CHIVALRIOUS_CHALLENGE = 219,
-	CONST_ME_DIVINE_DAZZLE = 220,
-	CONST_ME_ELECTRICALSPARK = 221,
-	CONST_ME_PURPLETELEPORT = 222,
-	CONST_ME_REDTELEPORT = 223,
-	CONST_ME_ORANGETELEPORT = 224,
-	CONST_ME_GREYTELEPORT = 225,
-	CONST_ME_LIGHTBLUETELEPORT = 226,
-	// 227-229 are empty
-	CONST_ME_FATAL = 230,
-	CONST_ME_DODGE = 231,
-	CONST_ME_HOURGLASS = 232,
-	// 233-234 are empty
-	CONST_ME_FERUMBRAS_1 = 235,
-	CONST_ME_GAZHARAGOTH = 236,
-	CONST_ME_MAD_MAGE = 237,
-	CONST_ME_HORESTIS = 238,
-	CONST_ME_DEVOVORGA = 239,
-	CONST_ME_FERUMBRAS_2 = 240,
-	CONST_ME_ENTINCE_SMOKE = 241,
-	CONST_ME_SMOKE_2 = 242,
-	CONST_ME_TEAR_SACRED = 243,
-	CONST_ME_METEOR_EXPLOSION = 244,
-	CONST_ME_ENTINCE_HOLY = 245,
-	CONST_ME_HOLY_MARK = 246,
-	CONST_ME_WATER_REMAINS = 247
+
+	CONST_ME_LAST = CONST_ME_BLUE_FIREWORKS,
 };
 
 enum ShootType_t : uint8_t {
@@ -228,19 +187,24 @@ enum ShootType_t : uint8_t {
 	CONST_ANI_EARTHARROW = 40,
 	CONST_ANI_EXPLOSION = 41,
 	CONST_ANI_CAKE = 42,
-	//New Distance Include
-	CONST_ANI_TARSALARROW = 44,
+
+    CONST_ANI_TARSALARROW = 44,
 	CONST_ANI_VORTEXBOLT = 45,
+
 	CONST_ANI_PRISMATICBOLT = 48,
 	CONST_ANI_CRYSTALLINEARROW = 49,
 	CONST_ANI_DRILLBOLT = 50,
 	CONST_ANI_ENVENOMEDARROW = 51,
+
 	CONST_ANI_GLOOTHSPEAR = 53,
 	CONST_ANI_SIMPLEARROW = 54,
-	CONST_ANI_LEAFSTAR = 56,
+
+    CONST_ANI_LEAFSTAR = 56,
 	CONST_ANI_DIAMONDARROW = 57,
 	CONST_ANI_SPECTRALBOLT = 58,
 	CONST_ANI_ROYALSTAR = 59,
+
+	CONST_ANI_LAST = CONST_ANI_ROYALSTAR,
 
 	// for internal use, don't send to client
 	CONST_ANI_WEAPONTYPE = 0xFE, // 254
@@ -289,7 +253,6 @@ enum FluidColors_t : uint8_t {
 	FLUID_YELLOW,
 	FLUID_WHITE,
 	FLUID_PURPLE,
-	FLUID_BLACK,
 };
 
 enum FluidTypes_t : uint8_t {
@@ -301,7 +264,6 @@ enum FluidTypes_t : uint8_t {
 	FLUID_LEMONADE = FLUID_YELLOW,
 	FLUID_MILK = FLUID_WHITE,
 	FLUID_MANA = FLUID_PURPLE,
-	FLUID_INK = FLUID_BLACK,
 
 	FLUID_LIFE = FLUID_RED + 8,
 	FLUID_OIL = FLUID_BROWN + 8,
@@ -332,7 +294,6 @@ const uint8_t reverseFluidMap[] = {
 	FLUID_EMPTY,
 	FLUID_LEMONADE,
 	FLUID_MILK,
-	FLUID_INK,
 };
 
 const uint8_t clientToServerFluidMap[] = {
@@ -354,7 +315,6 @@ const uint8_t clientToServerFluidMap[] = {
 	FLUID_COCONUTMILK,
 	FLUID_TEA,
 	FLUID_MEAD,
-	FLUID_INK,
 };
 
 enum ClientFluidTypes_t : uint8_t {
@@ -368,7 +328,6 @@ enum ClientFluidTypes_t : uint8_t {
 	CLIENTFLUID_BROWN = 7,
 	CLIENTFLUID_YELLOW = 8,
 	CLIENTFLUID_WHITE = 9,
-	CLIENTFLUID_BLACK = 18,
 };
 
 const uint8_t fluidMap[] = {
@@ -380,7 +339,6 @@ const uint8_t fluidMap[] = {
 	CLIENTFLUID_YELLOW,
 	CLIENTFLUID_WHITE,
 	CLIENTFLUID_PURPLE,
-	CLIENTFLUID_BLACK,
 };
 
 enum SquareColor_t : uint8_t {
@@ -388,28 +346,18 @@ enum SquareColor_t : uint8_t {
 };
 
 enum TextColor_t : uint8_t {
-	TEXTCOLOR_BLACK = 0,
 	TEXTCOLOR_BLUE = 5,
-	TEXTCOLOR_GREEN = 18,
-	TEXTCOLOR_LIGHTGREEN = 66,
-	TEXTCOLOR_DARKBROWN = 78,
-	TEXTCOLOR_DARKGREY = 86,
-	TEXTCOLOR_LIGHTBLUE = 89,
+	TEXTCOLOR_LIGHTGREEN = 30,
+	TEXTCOLOR_LIGHTBLUE = 35,
 	TEXTCOLOR_MAYABLUE = 95,
 	TEXTCOLOR_DARKRED = 108,
-	TEXTCOLOR_DARKPURPLE = 112,
-	TEXTCOLOR_BROWN = 120,
-	TEXTCOLOR_GREY = 129,
-	TEXTCOLOR_TEAL = 143,
-	TEXTCOLOR_DARKPINK = 152,
-	TEXTCOLOR_PURPLE = 154,
-	TEXTCOLOR_DARKORANGE = 156,
+	TEXTCOLOR_LIGHTGREY = 129,
+	TEXTCOLOR_SKYBLUE = 143,
+	TEXTCOLOR_PURPLE = 155,
 	TEXTCOLOR_RED = 180,
-	TEXTCOLOR_PINK = 190,
-	TEXTCOLOR_ORANGE = 192,
-	TEXTCOLOR_DARKYELLOW = 205,
+	TEXTCOLOR_ORANGE = 198,
 	TEXTCOLOR_YELLOW = 210,
-	TEXTCOLOR_WHITE = 215,
+	TEXTCOLOR_WHITE_EXP = 215,
 	TEXTCOLOR_NONE = 255,
 };
 
@@ -440,7 +388,6 @@ enum WeaponType_t : uint8_t {
 	WEAPON_DISTANCE,
 	WEAPON_WAND,
 	WEAPON_AMMO,
-	WEAPON_QUIVER,
 };
 
 enum Ammo_t : uint8_t {
@@ -462,7 +409,6 @@ enum WeaponAction_t : uint8_t {
 };
 
 enum WieldInfo_t {
-	WIELDINFO_NONE = 0 << 0,
 	WIELDINFO_LEVEL = 1 << 0,
 	WIELDINFO_MAGLV = 1 << 1,
 	WIELDINFO_VOCREQ = 1 << 2,
@@ -475,7 +421,7 @@ enum Skulls_t : uint8_t {
 	SKULL_GREEN = 2,
 	SKULL_WHITE = 3,
 	SKULL_RED = 4,
-	SKULL_BLACK = 5
+	SKULL_BLACK = 5,
 };
 
 enum PartyShields_t : uint8_t {
@@ -500,84 +446,81 @@ enum GuildEmblems_t : uint8_t {
 };
 
 enum item_t : uint16_t {
-	ITEM_FIREFIELD_PVP_FULL = 2118,
-	ITEM_FIREFIELD_PVP_MEDIUM = 2119,
-	ITEM_FIREFIELD_PVP_SMALL = 2120,
-	ITEM_FIREFIELD_PERSISTENT_FULL = 2123,
-	ITEM_FIREFIELD_PERSISTENT_MEDIUM = 2124,
-	ITEM_FIREFIELD_PERSISTENT_SMALL = 2125,
-	ITEM_FIREFIELD_NOPVP = 21465,
+	
+	ITEM_BROWSEFIELD = 460,
+	
+	ITEM_DEPOT_NULL = 25452, // for internal use
 
-	ITEM_POISONFIELD_PVP = 2121,
-	ITEM_POISONFIELD_PERSISTENT = 2127,
+	ITEM_DEPOT_I = 25453,
+	ITEM_DEPOT_II = 25454,
+	ITEM_DEPOT_III = 25455,
+	ITEM_DEPOT_IV = 25456,
+	ITEM_DEPOT_V = 25457,
+	ITEM_DEPOT_VI = 25458,
+	ITEM_DEPOT_VII = 25459,
+	ITEM_DEPOT_VIII = 25460,
+	ITEM_DEPOT_IX = 25461,
+	ITEM_DEPOT_X = 25462,
+	ITEM_DEPOT_XI = 25463,
+	ITEM_DEPOT_XII = 25464,
+	ITEM_DEPOT_XIII = 25465,
+	ITEM_DEPOT_XIV = 25466,
+	ITEM_DEPOT_XV = 25467,
+	ITEM_DEPOT_XVI = 25468,
+	ITEM_DEPOT_XVII = 25469,
+	
+	ITEM_FIREFIELD_PVP_FULL = 1487,
+	ITEM_FIREFIELD_PVP_MEDIUM = 1488,
+	ITEM_FIREFIELD_PVP_SMALL = 1489,
+	ITEM_FIREFIELD_PERSISTENT_FULL = 1492,
+	ITEM_FIREFIELD_PERSISTENT_MEDIUM = 1493,
+	ITEM_FIREFIELD_PERSISTENT_SMALL = 1494,
+	ITEM_FIREFIELD_NOPVP = 1500,
+
+	ITEM_POISONFIELD_PVP = 1490,
+	ITEM_POISONFIELD_PERSISTENT = 1496,
 	ITEM_POISONFIELD_NOPVP = 1503,
 
-	ITEM_ENERGYFIELD_PVP = 2122,
-	ITEM_ENERGYFIELD_PERSISTENT = 2126,
-	ITEM_ENERGYFIELD_NOPVP = 2134,
+	ITEM_ENERGYFIELD_PVP = 1491,
+	ITEM_ENERGYFIELD_PERSISTENT = 1495,
+	ITEM_ENERGYFIELD_NOPVP = 1504,
 
-	ITEM_MAGICWALL = 2129,
-	ITEM_MAGICWALL_PERSISTENT = 2128,
-	ITEM_MAGICWALL_SAFE = 10181,
+	ITEM_MAGICWALL = 1497,
+	ITEM_MAGICWALL_PERSISTENT = 1498,
+	ITEM_MAGICWALL_SAFE = 11098,
 
-	ITEM_WILDGROWTH = 2130,
-	ITEM_WILDGROWTH_PERSISTENT = 3635,
-	ITEM_WILDGROWTH_SAFE = 10182,
+	ITEM_WILDGROWTH = 1499,
+	ITEM_WILDGROWTH_PERSISTENT = 2721,
+	ITEM_WILDGROWTH_SAFE = 11099,
 
-	ITEM_BAG = 2853,
-	ITEM_BACKPACK = 21411,
+	ITEM_BAG = 1987,
 
-	ITEM_GOLD_COIN = 3031,
-	ITEM_PLATINUM_COIN = 3035,
-	ITEM_CRYSTAL_COIN = 3043,
-	ITEM_INGOT_DIAMOND = 42500,
-	ITEM_INGOT_PLATINUM = 42501,
+	ITEM_GOLD_COIN = 2148,
+	ITEM_PLATINUM_COIN = 2152,
+	ITEM_CRYSTAL_COIN = 2160,
+	ITEM_BAR_COIN = 17100,
 
-	ITEM_DEPOT = 3502,
-	ITEM_LOCKER = 3497,
-	ITEM_INBOX = 12902,
-	ITEM_SUPPLY_STASH = 28750,
-	
-	// move to separate enum class?
-	
-	ITEM_DEPOT_BOX_I = 22797,
-	ITEM_DEPOT_BOX_II = 22798,
-	ITEM_DEPOT_BOX_III = 22799,
-	ITEM_DEPOT_BOX_IV = 22800,
-	ITEM_DEPOT_BOX_V = 22801,
-	ITEM_DEPOT_BOX_VI = 22802,
-	ITEM_DEPOT_BOX_VII = 22803,
-	ITEM_DEPOT_BOX_VIII = 22804,
-	ITEM_DEPOT_BOX_IX = 22805,
-	ITEM_DEPOT_BOX_X = 22806,
-	ITEM_DEPOT_BOX_XI = 22807,
-	ITEM_DEPOT_BOX_XII = 22808,
-	ITEM_DEPOT_BOX_XIII = 22809,
-	ITEM_DEPOT_BOX_XIV = 22810,
-	ITEM_DEPOT_BOX_XV = 22811,
-	ITEM_DEPOT_BOX_XVI = 22812,
-	ITEM_DEPOT_BOX_XVII = 22813,
-	ITEM_DEPOT_BOX_XVIII = 31915,
-	ITEM_DEPOT_BOX_XIX = 39723,
-	ITEM_DEPOT_BOX_XX = 39724,
-	
-	ITEM_REWARD_CONTAINER = 19202, // Bag of Loot
-	ITEM_REWARD_CHEST = 19250, // Chest of Reward Boss
+	ITEM_REWARD_CONTAINER = 21518, // expedition bag
+	ITEM_REWARD_CHEST = 21584, // sturdy chest
 
-	ITEM_MALE_CORPSE = 4240,
-	ITEM_FEMALE_CORPSE = 4247,
+	ITEM_DEPOT = 2594,
+	ITEM_LOCKER1 = 2589,
+	ITEM_INBOX = 14404,
 
-	ITEM_FULLSPLASH = 2886,
-	ITEM_SMALLSPLASH = 2889,
+	ITEM_MALE_CORPSE = 3058,
+	ITEM_FEMALE_CORPSE = 3065,
 
-	ITEM_PARCEL = 3503,
-	ITEM_LETTER = 3505,
-	ITEM_LETTER_STAMPED = 3506,
-	ITEM_LABEL = 3507,
+	ITEM_FULLSPLASH = 2016,
+	ITEM_SMALLSPLASH = 2019,
 
-	ITEM_AMULETOFLOSS = 3057,
+	ITEM_PARCEL = 2595,
+	ITEM_LETTER = 2597,
+	ITEM_LETTER_STAMPED = 2598,
+	ITEM_LABEL = 2599,
 
-	ITEM_DOCUMENT_RO = 2834, //read-only
+	ITEM_AMULETOFLOSS = 2173,
+
+	ITEM_DOCUMENT_RO = 1968, //read-only
 };
 
 enum PlayerFlags : uint64_t {
@@ -619,9 +562,6 @@ enum PlayerFlags : uint64_t {
 	PlayerFlag_IgnoreWeaponCheck = static_cast<uint64_t>(1) << 35,
 	PlayerFlag_CannotBeMuted = static_cast<uint64_t>(1) << 36,
 	PlayerFlag_IsAlwaysPremium = static_cast<uint64_t>(1) << 37,
-	PlayerFlag_IgnoreYellCheck = static_cast<uint64_t>(1) << 38,
-	PlayerFlag_IgnoreSendPrivateCheck = static_cast<uint64_t>(1) << 39,
-	PlayerFlag_CanMoveAllThings = static_cast<uint64_t>(1) << 40,
 };
 
 enum ReloadTypes_t : uint8_t  {
@@ -633,141 +573,25 @@ enum ReloadTypes_t : uint8_t  {
 	RELOAD_TYPE_EVENTS,
 	RELOAD_TYPE_GLOBAL,
 	RELOAD_TYPE_GLOBALEVENTS,
-	RELOAD_TYPE_MOUNTS,
 	RELOAD_TYPE_ITEMS,
 	RELOAD_TYPE_MONSTERS,
+	RELOAD_TYPE_MOUNTS,
 	RELOAD_TYPE_MOVEMENTS,
 	RELOAD_TYPE_NPCS,
 	RELOAD_TYPE_QUESTS,
-	RELOAD_TYPE_SCRIPTS,
+	RELOAD_TYPE_RAIDS,
 	RELOAD_TYPE_SPELLS,
 	RELOAD_TYPE_TALKACTIONS,
 	RELOAD_TYPE_WEAPONS,
 };
 
-// OTCv8 features (from src/client/const.h)
-enum GameFeature {
-	GameProtocolChecksum = 1,
-	GameAccountNames = 2,
-	GameChallengeOnLogin = 3,
-	GamePenalityOnDeath = 4,
-	GameNameOnNpcTrade = 5,
-	GameDoubleFreeCapacity = 6,
-	GameDoubleExperience = 7,
-	GameTotalCapacity = 8,
-	GameSkillsBase = 9,
-	GamePlayerRegenerationTime = 10,
-	GameChannelPlayerList = 11,
-	GamePlayerMounts = 12,
-	GameEnvironmentEffect = 13,
-	GameCreatureEmblems = 14,
-	GameItemAnimationPhase = 15,
-	GameMagicEffectU16 = 16,
-	GamePlayerMarket = 17,
-	GameSpritesU32 = 18,
-	GameTileAddThingWithStackpos = 19,
-	GameOfflineTrainingTime = 20,
-	GamePurseSlot = 21,
-	GameFormatCreatureName = 22,
-	GameSpellList = 23,
-	GameClientPing = 24,
-	GameExtendedClientPing = 25,
-	GameDoubleHealth = 28,
-	GameDoubleSkills = 29,
-	GameChangeMapAwareRange = 30,
-	GameMapMovePosition = 31,
-	GameAttackSeq = 32,
-	GameBlueNpcNameColor = 33,
-	GameDiagonalAnimatedText = 34,
-	GameLoginPending = 35,
-	GameNewSpeedLaw = 36,
-	GameForceFirstAutoWalkStep = 37,
-	GameMinimapRemove = 38,
-	GameDoubleShopSellAmount = 39,
-	GameContainerPagination = 40,
-	GameThingMarks = 41,
-	GameLooktypeU16 = 42,
-	GamePlayerStamina = 43,
-	GamePlayerAddons = 44,
-	GameMessageStatements = 45,
-	GameMessageLevel = 46,
-	GameNewFluids = 47,
-	GamePlayerStateU16 = 48,
-	GameNewOutfitProtocol = 49,
-	GamePVPMode = 50,
-	GameWritableDate = 51,
-	GameAdditionalVipInfo = 52,
-	GameBaseSkillU16 = 53,
-	GameCreatureIcons = 54,
-	GameHideNpcNames = 55,
-	GameSpritesAlphaChannel = 56,
-	GamePremiumExpiration = 57,
-	GameBrowseField = 58,
-	GameEnhancedAnimations = 59,
-	GameOGLInformation = 60,
-	GameMessageSizeCheck = 61,
-	GamePreviewState = 62,
-	GameLoginPacketEncryption = 63,
-	GameClientVersion = 64,
-	GameContentRevision = 65,
-	GameExperienceBonus = 66,
-	GameAuthenticator = 67,
-	GameUnjustifiedPoints = 68,
-	GameSessionKey = 69,
-	GameDeathType = 70,
-	GameIdleAnimations = 71,
-	GameKeepUnawareTiles = 72,
-	GameIngameStore = 73,
-	GameIngameStoreHighlights = 74,
-	GameIngameStoreServiceType = 75,
-	GameAdditionalSkills = 76,
-	GameDistanceEffectU16 = 77,
-	GamePrey = 78,
-	GameDoubleMagicLevel = 79,
-
-	GameExtendedOpcode = 80,
-	GameMinimapLimitedToSingleFloor = 81,
-	GameSendWorldName = 82,
-
-	GameDoubleLevel = 83,
-	GameDoubleSoul = 84,
-	GameDoublePlayerGoodsMoney = 85,
-	GameCreatureWalkthrough = 86,
-	GameDoubleTradeMoney = 87,
-	GameSequencedPackets = 88,
-	GameTibia12Protocol = 89,
-
-	// 90-99 otclientv8 features
-	GameNewWalking = 90,
-	GameSlowerManualWalking = 91,
-
-	GameItemTooltip = 93,
-
-	GameBot = 95,
-	GameBiggerMapCache = 96,
-	GameForceLight = 97,
-	GameNoDebug = 98,
-	GameBotProtection = 99,
-
-	// Custom features for customer
-	GameFasterAnimations = 101,
-	GameCenteredOutfits = 102,
-	GameSendIdentifiers = 103,
-	GameWingsAndAura = 104,
-	GamePlayerStateU32 = 105,
-	GameOutfitShaders = 106,
-
-	// advanced features
-	GamePacketSizeU32 = 110,
-	GamePacketCompression = 111,
-
-	LastGameFeature = 120
-};
-
 static constexpr int32_t CHANNEL_GUILD = 0x00;
 static constexpr int32_t CHANNEL_PARTY = 0x01;
 static constexpr int32_t CHANNEL_PRIVATE = 0xFFFF;
-static constexpr int32_t CHANNEL_CAST = 0xFF;
+
+static constexpr int32_t CHANNEL_CAST = 40;
+const std::string LIVE_CAST_CHAT_NAME = "Live Channel";
+
 
 //Reserved player storage key ranges;
 //[10000000 - 20000000];
@@ -776,10 +600,10 @@ static constexpr int32_t PSTRG_RESERVED_RANGE_SIZE = 10000000;
 //[1000 - 1500];
 static constexpr int32_t PSTRG_OUTFITS_RANGE_START = (PSTRG_RESERVED_RANGE_START + 1000);
 static constexpr int32_t PSTRG_OUTFITS_RANGE_SIZE = 500;
-//[2001 - 2011]; mounts
- static constexpr int32_t PSTRG_MOUNTS_RANGE_START = (PSTRG_RESERVED_RANGE_START + 2001);
- static constexpr int32_t PSTRG_MOUNTS_RANGE_SIZE = 10;
- static constexpr int32_t PSTRG_MOUNTS_CURRENTMOUNT = (PSTRG_MOUNTS_RANGE_START + 10);
+//[2001 - 2011];
+static constexpr int32_t PSTRG_MOUNTS_RANGE_START = (PSTRG_RESERVED_RANGE_START + 2001);
+static constexpr int32_t PSTRG_MOUNTS_RANGE_SIZE = 10;
+static constexpr int32_t PSTRG_MOUNTS_CURRENTMOUNT = (PSTRG_MOUNTS_RANGE_START + 10);
 
 #define IS_IN_KEYRANGE(key, range) (key >= PSTRG_##range##_START && ((key - PSTRG_##range##_START) <= PSTRG_##range##_SIZE))
 
