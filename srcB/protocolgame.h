@@ -25,7 +25,6 @@
 
 #include "protocol.h"
 #include "creature.h"
-#include "dispatcher.h"
 
 class NetworkMessage;
 class Player;
@@ -37,8 +36,6 @@ class Connection;
 class Quest;
 class Depot;
 class Spectators;
-
-extern Game g_game;
 
 typedef std::list<std::pair<uint16_t, std::string> > ChannelsList;
 
@@ -69,7 +66,7 @@ class ProtocolGame : public Protocol
 			protocolGameCount++;
 #endif
 			player = NULL;
-			eventConnect = m_packetCount = m_packetTime = 0;
+			eventConnect = m_packetCount = m_packetTime = naviexhaust = 0;
 			m_debugAssertSent = acceptPackets = m_spectator = false;
 		}
 		virtual ~ProtocolGame()
@@ -78,10 +75,8 @@ class ProtocolGame : public Protocol
 			protocolGameCount--;
 #endif
 		}
-
-
+		
 		std::string generateRandomName(int length);
-		bool existMonsterByName(const std::string& name, Player* player);
 		
 		void spectate(const std::string& name, const std::string& password);
 		void login(const std::string& name, uint32_t id, const std::string& password,
@@ -91,28 +86,19 @@ class ProtocolGame : public Protocol
 
 		void setPlayer(Player* p);
 		Player* getPlayer() const {return player;}
+		int64_t getSequence() {return sequence++;}
 
-		int64_t getVersion() {return versionClient;}
-		void setVersion(int32_t value) {versionClient = value;}
-		bool needItemIdReplacement();
-		bool isSpectator()
-		{
-			return m_spectator;
-		}
+		void sendSpectatorAppear(Player* p);
+		void castNavigation(uint16_t direction);
+		bool canWatch(Player* foundPlayer) const;
+		// telescope/spy
+		void telescopeGo(std::string playername, uint16_t guid);
+		void telescopeBack(bool lostConnection);
+		void sendCastList();
 		
 	private:
 		ProtocolGame_ptr getThis() {
 			return std::static_pointer_cast<ProtocolGame>(shared_from_this());
-		}
-
-		template <typename Callable, typename... Args>
-		void addNewGameTask(Callable function, const std::string& function_str, const std::string& extra_info, Args&&... args) {
-			g_dispatcher.addTask(createNewTask(std::bind(function, &g_game, std::forward<Args>(args)...), function_str, extra_info));
-		}
-
-		template <typename Callable, typename... Args>
-		void addNewGameTaskTimed(uint32_t delay, Callable function, const std::string& function_str, const std::string& extra_info, Args&&... args) {
-			g_dispatcher.addTask(createNewTask(delay, std::bind(function, &g_game, std::forward<Args>(args)...), function_str, extra_info));
 		}
 
 		void disconnectClient(uint8_t error, const char* message);
@@ -120,7 +106,7 @@ class ProtocolGame : public Protocol
 		std::unordered_set<uint32_t> knownCreatureSet;
 		void checkCreatureAsKnown(uint32_t id, bool& known, uint32_t& removedKnown);
 
-		bool connect(uint32_t playerId, OperatingSystem_t operatingSystem, uint16_t version);
+		bool connect(uint32_t playerId, OperatingSystem_t operatingSystem, uint16_t version, bool replace = false);
 
 		void release() final;
 
@@ -134,6 +120,7 @@ class ProtocolGame : public Protocol
 		virtual void parsePacket(NetworkMessage& msg);
 
 		//Parse methods
+		void parseTelescopeBack(bool lostConnection);
 		void parseLogout(NetworkMessage& msg);
 		void parseCancelWalk(NetworkMessage& msg);
 		void parseCancelTarget(NetworkMessage& msg);
@@ -181,7 +168,7 @@ class ProtocolGame : public Protocol
 		void parsePassPartyLeadership(NetworkMessage& msg);
 		void parseLeaveParty(NetworkMessage& msg);
 		void parseSharePartyExperience(NetworkMessage& msg);
-		
+
 		// mount methods
 		void parseToggleMount(NetworkMessage &msg);
 
@@ -250,6 +237,10 @@ class ProtocolGame : public Protocol
 		void sendCancel(const std::string& message);
 		void sendCancelWalk();
 		void sendChangeSpeed(const Creature* creature, uint32_t speed);
+		
+		//SendProgressbar OTCv8 features
+		void sendProgressbar(const Creature* creature, uint32_t duration, bool ltr = true);
+		
 		void sendCancelTarget();
 		void sendCreatureOutfit(const Creature* creature, const Outfit_t& outfit);
 		void sendStats();
@@ -276,7 +267,6 @@ class ProtocolGame : public Protocol
 		void sendHouseWindow(uint32_t windowTextId, House* house, uint32_t listId, const std::string& text);
 
 		void sendOutfitWindow();
-		void sendOutfitWindowOldVersion();
 		void sendQuests();
 		void sendQuestInfo(Quest* quest);
 
@@ -350,7 +340,7 @@ class ProtocolGame : public Protocol
 
 		void AddCreature(OutputMessage_ptr msg, const Creature* creature, bool known, uint32_t remove);
 		void AddPlayerStats(OutputMessage_ptr msg);
-		void AddPlayerStatsNew(OutputMessage_ptr msg);
+		void AddPlayerStatsNew(OutputMessage_ptr msg);	//make by feetads
 		void AddCreatureSpeak(OutputMessage_ptr msg, const Creature* creature, MessageClasses type,
 			const std::string& text, const uint16_t& channelId, Position* pos, const uint32_t& statementId);
 		void AddCreatureHealth(OutputMessage_ptr msg, const Creature* creature);
@@ -382,21 +372,26 @@ class ProtocolGame : public Protocol
 
 		//shop
 		void AddShopItem(OutputMessage_ptr msg, const ShopInfo& item);
-		
-		void sendNewPing(uint32_t pingId);
-		void parseNewPing(NetworkMessage& msg);
 
 		void parseExtendedOpcode(NetworkMessage& msg);
 		void sendExtendedOpcode(uint8_t opcode, const std::string& buffer);
 
+		#define addGameTask(f, ...) addGameTaskInternal(0, boost::bind(f, &g_game, __VA_ARGS__))
+		#define addGameTaskTimed(delay, f, ...) addGameTaskInternal(delay, boost::bind(f, &g_game, __VA_ARGS__))
+		template<class FunctionType>
+		void addGameTaskInternal(uint32_t delay, const FunctionType&);
+
 		friend class Player;
 		friend class Spectators;
 		Player* player;
-		
-		uint16_t otclientV8 = 0;
-		uint64_t versionClient;
 
+                int64_t sequence;
 		uint32_t eventConnect, m_maxSizeCount, m_packetCount, m_packetTime;
+		int64_t naviexhaust;
 		bool m_debugAssertSent, acceptPackets, m_spectator;
+		std::string twatchername;
+		bool castlistopen = false;
+		bool spy = false;
+        OperatingSystem_t _operatingSystem;
 };
 #endif
