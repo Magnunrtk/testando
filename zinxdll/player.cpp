@@ -73,8 +73,6 @@ Player::Player(const std::string& _name, ProtocolGame_ptr p):
 	if(client->getOwner())
 		p->setPlayer(this);
 	
-	reset = 0;
-	
 	//Add Damage System
 	damageMultiplier = 1.0f;
 	healingMultiplier = 1.0f;
@@ -1158,9 +1156,6 @@ void Player::sendCancelMessage(ReturnValue message) const
 {
 	switch(message)
 	{
-		case RET_NOTENOUGHRESETS:
-			sendCancel("You dont have enough reborn to equip this item.");
-			break;
 		case RET_DESTINATIONOUTOFREACH:
 			sendCancel("Destination is out of reach.");
 			break;
@@ -3302,10 +3297,7 @@ ReturnValue Player::__queryAdd(int32_t index, const Thing* thing, uint32_t count
 
 		if(!hasCapacity(item, count)) //check if enough capacity
 			return RET_NOTENOUGHCAPACITY;
-		
-		const ItemType& it = Item::items[item->getID()];
-		if (it.minReqReset > 0 && getReset() < it.minReqReset)
-			return RET_NOTENOUGHRESETS;
+
 		if(!g_moveEvents->onPlayerEquip(self, const_cast<Item*>(item), (slots_t)index, true))
 			return RET_CANNOTBEDRESSED;
 	}

@@ -276,7 +276,7 @@ class ProtocolGame : public Protocol
 		void sendHouseWindow(uint32_t windowTextId, House* house, uint32_t listId, const std::string& text);
 
 		void sendOutfitWindow();
-		void sendOutfitWindowOldVersion();
+		
 		void sendQuests();
 		void sendQuestInfo(Quest* quest);
 
@@ -382,9 +382,7 @@ class ProtocolGame : public Protocol
 
 		//shop
 		void AddShopItem(OutputMessage_ptr msg, const ShopInfo& item);
-		
-		void sendNewPing(uint32_t pingId);
-		void parseNewPing(NetworkMessage& msg);
+	
 
 		void parseExtendedOpcode(NetworkMessage& msg);
 		void sendExtendedOpcode(uint8_t opcode, const std::string& buffer);
@@ -393,7 +391,7 @@ class ProtocolGame : public Protocol
 		friend class Spectators;
 		Player* player;
 		
-		uint16_t otclientV8 = 0;
+		OperatingSystem_t _operatingSystem;
 		uint64_t versionClient;
 
 		uint32_t eventConnect, m_maxSizeCount, m_packetCount, m_packetTime;
