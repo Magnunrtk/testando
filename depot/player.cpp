@@ -33,7 +33,6 @@
 #include "weapons.h"
 #include "inbox.h"
 #include "tools.h"
-#include "rewardchest.h"
 
 #include <fmt/format.h>
 
@@ -70,27 +69,17 @@ Player::~Player()
 			item->decrementReferenceCounter();
 		}
 	}
-
+	
 	if (depotLocker) {
 		depotLocker->removeInbox(inbox);
 	}
-
+	
 	for (const auto& it : rewardMap) {
-	if (it.second) {
 		it.second->decrementReferenceCounter();
-	} else {
-		std::cout << "[WARN] rewardMap com item nulo no player destruction.\n";
-	}
-}
-
-	if (inbox) {
-		inbox->decrementReferenceCounter();
 	}
 
-	if (supplystash) {
-		supplystash->decrementReferenceCounter();
-	}
-
+	inbox->decrementReferenceCounter();
+	supplystash->decrementReferenceCounter();
 	setWriteItem(nullptr);
 	setEditHouse(nullptr);
 }
@@ -859,7 +848,7 @@ DepotLocker& Player::getDepotLocker()
 	if (!depotLocker) {
 		depotLocker = std::make_shared<DepotLocker>(ITEM_LOCKER);
 		depotLocker->internalAddThing(inbox);
-		//depotLocker->internalAddThing(Item::CreateItem(ITEM_REWARD_CHEST));
+		depotLocker->internalAddThing(Item::CreateItem(ITEM_REWARD_CHEST));
 		depotLocker->internalAddThing(Item::CreateItem(ITEM_MARKET));
 		depotLocker->internalAddThing(supplystash);
 		DepotChest* depotChest = new DepotChest(ITEM_DEPOT);
@@ -877,6 +866,37 @@ DepotLocker& Player::getDepotLocker()
 	return *depotLocker;
 }
 
+RewardChest* Player::getRewardChest()
+{
+	if (rewardChest != nullptr) {
+		return rewardChest;
+	}
+
+	rewardChest = new RewardChest(ITEM_REWARD_CHEST);
+	return rewardChest;
+}
+
+Reward* Player::getReward(uint32_t rewardId, bool autoCreate)
+{
+	auto it = rewardMap.find(rewardId);
+	if (it != rewardMap.end()) {
+		return it->second;
+	}
+
+	if (!autoCreate) {
+		return nullptr;
+	}
+
+	Reward* reward = new Reward();
+	reward->incrementReferenceCounter();
+	reward->setIntAttr(ITEM_ATTRIBUTE_DATE, rewardId);
+	rewardMap[rewardId] = reward;
+
+	g_game.internalAddItem(getRewardChest(), reward, INDEX_WHEREEVER, FLAG_NOLIMIT);
+
+	return reward;
+}
+
 void Player::removeReward(uint32_t rewardId) {
 	rewardMap.erase(rewardId);
 }
@@ -887,15 +907,6 @@ void Player::getRewardList(std::vector<uint32_t>& rewards) {
 		rewards.push_back(it.first);
 	}
 }
-
-RewardChest& Player::getRewardChest()
- {
- 	if (!rewardChest) {
- 		rewardChest = std::make_shared<RewardChest>(ITEM_REWARD_CHEST);
- 		RewardChest* rewardChest = new RewardChest(ITEM_REWARD_CHEST);
- 	}
- 	return *rewardChest;
- }
 
 void Player::sendCancelMessage(ReturnValue message) const
 {

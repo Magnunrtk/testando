@@ -358,77 +358,51 @@ ReturnValue Actions::internalUseItem(Player* player, const Position& pos, uint8_
 	if (Container* container = item->getContainer()) {
 		Container* openContainer;
 
-		// depot container
-if (DepotLocker* depot = container->getDepotLocker()) {
-	static DepotLocker myDepotLocker(ITEM_DEPOT); // item ID genérico, você pode trocar se precisar
-	if (depot->getParent()) {
-		myDepotLocker.setParent(depot->getParent()->getTile());
-	}
-	openContainer = &myDepotLocker;
-} else {
-	openContainer = container;
-}
+		//depot container
+		if (DepotLocker* depot = container->getDepotLocker()) {
+			DepotLocker& myDepotLocker = player->getDepotLocker();
+			myDepotLocker.setParent(depot->getParent()->getTile());
+			openContainer = &myDepotLocker;
+		} else {
+			openContainer = container;
+		}
+		
+		//reward chest
+		if (container->getRewardChest()) {
+  			RewardChest* myRewardChest = player->getRewardChest();
+   			if (myRewardChest->size() == 0) {
+    				return RETURNVALUE_REWARDCHESTISEMPTY;
+    			}
 
-uint32_t corpseOwner = container->getCorpseOwner();
-if (container->isRewardCorpse()) {
-	RewardChest& myRewardChest = player->getRewardChest();
+   			myRewardChest->setParent(container->getParent()->getTile());
+   			for (auto& it : player->rewardMap) {
+   				it.second->setParent(myRewardChest);
+    			}
 
-	for (Item* subItem : container->getItemList()) {
-		if (subItem->getID() == ITEM_REWARD_CONTAINER) {
-			int64_t rewardDate = subItem->getIntAttr(ITEM_ATTRIBUTE_DATE);
+			openContainer = myRewardChest;
+ 		}
 
-			bool foundMatch = false;
-			for (Item* rewardItem : myRewardChest.getItemList()) {
-				if (rewardItem->getID() == ITEM_REWARD_CONTAINER && rewardItem->getIntAttr(ITEM_ATTRIBUTE_DATE) == rewardDate) {
-					foundMatch = true;
-					break;
-				}
-			}
-
-			if (!foundMatch) {
-				return RETURNVALUE_NOTPOSSIBLE;
+		//reward container proxy created when the boss dies
+		if (container->getID() == ITEM_REWARD_CONTAINER && !container->getReward()) {
+			if (Reward* reward = player->getReward(container->getIntAttr(ITEM_ATTRIBUTE_DATE), false)) {
+				reward->setParent(container->getRealParent());
+				openContainer = reward;
+			} else {
+				return RETURNVALUE_THISISIMPOSSIBLE;
 			}
 		}
-	}
-}
-else if (corpseOwner != 0 && !player->canOpenCorpse(corpseOwner)) {
-	return RETURNVALUE_YOUARENOTTHEOWNER;
-}
- 
- 		// Reward chest
- 		if (RewardChest* rewardchest = container->getRewardChest()) {
- 			RewardChest& myRewardChest = player->getRewardChest();
- 			myRewardChest.setParent(rewardchest->getParent()->getTile());
- 
- 			if (myRewardChest.getItemList().empty()) {
- 				return RETURNVALUE_REWARDCHESTEMPTY;
- 			}
- 
- 			for (Item* rewardItem : myRewardChest.getItemList()) {
- 				if (rewardItem->getID() == ITEM_REWARD_CONTAINER) {
- 					Container* rewardContainer = rewardItem->getContainer();
- 					if (rewardContainer) {
- 						rewardContainer->setParent(&myRewardChest);
- 					}
- 				}
- 			}
- 			openContainer = &myRewardChest;
- 		}
- 		else if (item->getID() == ITEM_REWARD_CONTAINER)  {				
- 			RewardChest& myRewardChest = player->getRewardChest();
- 			int64_t rewardDate = item->getIntAttr(ITEM_ATTRIBUTE_DATE);
- 
- 			for (Item* rewardItem : myRewardChest.getItemList()) {
- 				if (rewardItem->getID() == ITEM_REWARD_CONTAINER && rewardItem->getIntAttr(ITEM_ATTRIBUTE_DATE) == rewardDate && rewardItem->getIntAttr(ITEM_ATTRIBUTE_REWARDID) == item->getIntAttr(ITEM_ATTRIBUTE_REWARDID)) {
- 				  Container* rewardContainer = rewardItem->getContainer();
- 					if (rewardContainer) {
- 						rewardContainer->setParent(container->getRealParent());
- 						openContainer = rewardContainer;
- 					}
- 					break;
- 				}
- 			}
- 		}
+
+		uint32_t corpseOwner = container->getCorpseOwner();
+		if (container->isRewardCorpse()) {
+			// only players who participated in the fight can open the corpse
+			if (player->getGroup()->id == 6) // << -- Place the GOD Group
+				return RETURNVALUE_YOUCANTOPENCORPSEADM;
+			if (!player->getReward(container->getIntAttr(ITEM_ATTRIBUTE_DATE), false)) {
+				return RETURNVALUE_YOUARENOTTHEOWNER;
+			}
+		} else if (corpseOwner != 0 && !player->canOpenCorpse(corpseOwner)) {
+			return RETURNVALUE_YOUARENOTTHEOWNER;
+		}
 
 		//open/close container
 		int32_t oldContainerId = player->getContainerID(openContainer);
