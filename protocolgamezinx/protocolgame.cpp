@@ -821,7 +821,7 @@ void ProtocolGame::GetTileDescription(const Tile* tile, OutputMessage_ptr msg)
 	int32_t count = 0;
 	if(tile->ground)
 	{
-		msg->addItem(tile->ground, player);
+		msg->addItem(tile->ground);
 		++count;
 	}
 
@@ -831,13 +831,13 @@ void ProtocolGame::GetTileDescription(const Tile* tile, OutputMessage_ptr msg)
 	ItemVector::const_iterator it;
 	if(items)
 	{
-		for(it = items->getBeginTopItem(); (it != items->getEndTopItem() && count < 10); ++it, ++count)
-			msg->addItem(*it, player);
+		for(it = items->getBeginTopItem(); (it != items->getEndTopItem() && count < 30); ++it, ++count)
+			msg->addItem(*it);
 	}
 
 	if(creatures)
 	{
-		for(CreatureVector::const_reverse_iterator cit = creatures->rbegin(); (cit != creatures->rend() && count < 10); ++cit)
+		for(CreatureVector::const_reverse_iterator cit = creatures->rbegin(); (cit != creatures->rend() && count < 30); ++cit)
 		{
 			if(!player->canSeeCreature(*cit))
 				continue;
@@ -853,8 +853,8 @@ void ProtocolGame::GetTileDescription(const Tile* tile, OutputMessage_ptr msg)
 
 	if(items)
 	{
-		for(it = items->getBeginDownItem(); (it != items->getEndDownItem() && count < 10); ++it, ++count)
-			msg->addItem(*it, player);
+		for(it = items->getBeginDownItem(); (it != items->getEndDownItem() && count < 30); ++it, ++count)
+			msg->addItem(*it);
 	}
 }
 
@@ -1783,7 +1783,7 @@ void ProtocolGame::sendContainer(uint32_t cid, const Container* container, bool 
 	msg->addByte(0x6E);
 	msg->addByte(cid);
 
-	msg->addItem(container, player);
+	msg->addItem(container);
 	msg->addString(container->getName());
 	msg->addByte(container->capacity());
 
@@ -1792,7 +1792,7 @@ void ProtocolGame::sendContainer(uint32_t cid, const Container* container, bool 
 
 	ItemList::const_iterator cit = container->getItems();
 	for(uint32_t i = 0; cit != container->getEnd() && i < 255; ++cit, ++i)
-		msg->addItem(*cit, player);
+		msg->addItem(*cit);
 }
 
 void ProtocolGame::sendShop(Npc*, const ShopInfoList& shop)
@@ -1893,7 +1893,7 @@ void ProtocolGame::sendGoods(const ShopInfoList& shop)
 	std::map<uint32_t, uint32_t>::const_iterator it = goodsMap.begin();
 	for(uint32_t i = 0; it != goodsMap.end() && i < 255; ++it, ++i)
 	{
-		msg->addItemId(it->first, player);
+		msg->addItemId(it->first);
 		msg->addByte(std::min(it->second, (uint32_t)255));
 	}
 }
@@ -1963,16 +1963,16 @@ void ProtocolGame::sendTradeItemRequest(const Player* _player, const Item* item,
 	if (const Container* container = item->getContainer())
 	{
 		msg->addByte(std::min(255U, container->getItemHoldingCount() + 1));
-		msg->addItem(item, player);
+		msg->addItem(item);
 
 		uint16_t i = 0;
 		for (ContainerIterator it = container->begin(); i < 255 && it != container->end(); ++it, ++i)
-			msg->addItem(*it, player);
+			msg->addItem(*it);
 	}
 	else
 	{
 		msg->addByte(1);
-		msg->addItem(item, player);
+		msg->addItem(item);
 	}
 }
 
@@ -1999,7 +1999,7 @@ void ProtocolGame::sendCloseContainer(uint32_t cid)
 
 void ProtocolGame::sendCreatureTurn(const Creature* creature, int16_t stackpos)
 {
-	if(stackpos >= 10 || !canSee(creature))
+	if(stackpos >= 30 || !canSee(creature))
 		return;
 
 	OutputMessage_ptr msg = getOutputBuffer();
@@ -2205,7 +2205,7 @@ void ProtocolGame::sendFYIBox(const std::string& message)
 //tile
 void ProtocolGame::sendAddTileItem(const Tile*, const Position& pos, uint32_t stackpos, const Item* item)
 {
-	if(stackpos >= 10 || !canSee(pos))
+	if(stackpos >= 30 || !canSee(pos))
 		return;
 
 	OutputMessage_ptr msg = getOutputBuffer();
@@ -2218,7 +2218,7 @@ void ProtocolGame::sendAddTileItem(const Tile*, const Position& pos, uint32_t st
 
 void ProtocolGame::sendUpdateTileItem(const Tile*, const Position& pos, uint32_t stackpos, const Item* item)
 {
-	if(stackpos >= 10 || !canSee(pos))
+	if(stackpos >= 30 || !canSee(pos))
 		return;
 
 	OutputMessage_ptr msg = getOutputBuffer();
@@ -2231,7 +2231,7 @@ void ProtocolGame::sendUpdateTileItem(const Tile*, const Position& pos, uint32_t
 
 void ProtocolGame::sendRemoveTileItem(const Tile*, const Position& pos, uint32_t stackpos)
 {
-	if(stackpos >= 10 || !canSee(pos))
+	if(stackpos >= 30 || !canSee(pos))
 		return;
 
 	OutputMessage_ptr msg = getOutputBuffer();
@@ -2274,7 +2274,7 @@ void ProtocolGame::sendAddCreature(const Creature* creature, const Position& pos
 
 	if(creature != player)
 	{
-		if (stackpos >= 10) {
+		if (stackpos >= 30) {
 			return;
 		}
 
@@ -2349,7 +2349,7 @@ void ProtocolGame::sendAddCreature(const Creature* creature, const Position& pos
 
 void ProtocolGame::sendRemoveCreature(const Creature*, const Position& pos, uint32_t stackpos)
 {
-	if(stackpos >= 10 || !canSee(pos))
+	if(stackpos >= 30 || !canSee(pos))
 		return;
 
 	OutputMessage_ptr msg = getOutputBuffer();
@@ -2576,7 +2576,7 @@ void ProtocolGame::sendTextWindow(uint32_t windowTextId, Item* item, uint16_t ma
 	TRACK_MESSAGE(msg);
 	msg->addByte(0x96);
 	msg->add<uint32_t>(windowTextId);
-	msg->addItem(item, player);
+	msg->addItem(item);
 	if(canWrite)
 	{
 		msg->add<uint16_t>(maxLen);
@@ -2771,7 +2771,7 @@ void ProtocolGame::reloadCreature(const Creature* creature)
 
 	// we are cheating the client in here!
 	uint32_t stackpos = creature->getTile()->getClientIndexOfThing(player, creature);
-	if(stackpos >= 10)
+	if(stackpos >= 30)
 		return;
 
 	OutputMessage_ptr msg = getOutputBuffer();
@@ -3099,11 +3099,12 @@ void ProtocolGame::AddCreatureHealth(OutputMessage_ptr msg,const Creature* creat
 
 void ProtocolGame::AddCreatureOutfit(OutputMessage_ptr msg, const Creature* creature, const Outfit_t& outfit, bool outfitWindow/* = false*/)
 {
-	const Player* cp = creature->getPlayer();
-	if ((outfitWindow || (!creature->isInvisible() && (!creature->isGhost() || !g_config.getBool(ConfigManager::GHOST_INVISIBLE_EFFECT)))) ||
-		(!creature->isInvisible() && cp && cp->isGhost() && cp->getGroupId() < 3))		//if player is ghost and GHOST_INVISIBLE_EFFECT = true, send normal outfit
+	if(outfitWindow || (!creature->isInvisible() && (!creature->isGhost()
+		|| !g_config.getBool(ConfigManager::GHOST_INVISIBLE_EFFECT))))
 	{
-		msg->add<uint16_t>(outfit.lookType);
+		uint32_t operatingSystem = player->getOperatingSystem();
+		uint16_t modifiedLookType = (outfit.lookType > 367 && operatingSystem < CLIENTOS_CUSTOM_DLL) ? 128 : outfit.lookType;
+		msg->add<uint16_t>(modifiedLookType);
 		if(outfit.lookType)
 		{
 			msg->addByte(outfit.lookHead);
@@ -3113,17 +3114,23 @@ void ProtocolGame::AddCreatureOutfit(OutputMessage_ptr msg, const Creature* crea
 			msg->addByte(outfit.lookAddons);
 		}
 		else if(outfit.lookTypeEx)
-			msg->addItemId(outfit.lookTypeEx, player);
+			msg->addItemId(outfit.lookTypeEx);
 		else
 			msg->add<uint16_t>(outfit.lookTypeEx);
+
+		if (player && player->getOperatingSystem() >= CLIENTOS_CUSTOM_DLL)
+		{
+			msg->add<uint16_t>(outfit.lookMount);
+		}
 	}
 	else
+	{
 		msg->add<uint32_t>(0x00);
-
-	// mount
-    if (_operatingSystem >= CLIENTOS_CUSTOM_DLL) {
-        msg->add<uint16_t>(outfit.lookMount);
-    }
+		if (player && player->getOperatingSystem() >= CLIENTOS_CUSTOM_DLL)
+		{
+			msg->add<uint16_t>(0x00);
+		}
+	}
 }
 
 void ProtocolGame::AddWorldLight(OutputMessage_ptr msg, const LightInfo& lightInfo)
@@ -3148,17 +3155,17 @@ void ProtocolGame::AddCreatureLight(OutputMessage_ptr msg, const Creature* creat
 //tile
 void ProtocolGame::AddTileItem(OutputMessage_ptr msg, const Position& pos, uint32_t stackpos, const Item* item)
 {
-	if (stackpos >= 10) return;
+	if (stackpos >= 30) return;
 
 	msg->addByte(0x6A);
 	msg->addPosition(pos);
 	msg->addByte(stackpos);
-	msg->addItem(item, player);
+	msg->addItem(item);
 }
 
 void ProtocolGame::AddTileCreature(OutputMessage_ptr msg, const Position& pos, uint32_t stackpos, const Creature* creature)
 {
-	if (stackpos >= 10) return;
+	if (stackpos >= 30) return;
 
 	msg->addByte(0x6A);
 	msg->addPosition(pos);
@@ -3172,17 +3179,17 @@ void ProtocolGame::AddTileCreature(OutputMessage_ptr msg, const Position& pos, u
 
 void ProtocolGame::UpdateTileItem(OutputMessage_ptr msg, const Position& pos, uint32_t stackpos, const Item* item)
 {
-	if (stackpos >= 10) return;
+	if (stackpos >= 30) return;
 
 	msg->addByte(0x6B);
 	msg->addPosition(pos);
 	msg->addByte(stackpos);
-	msg->addItem(item, player);
+	msg->addItem(item);
 }
 
 void ProtocolGame::RemoveTileItem(OutputMessage_ptr msg, const Position& pos, uint32_t stackpos)
 {
-	if (stackpos >= 10) return;
+	if (stackpos >= 30) return;
 
 	msg->addByte(0x6C);
 	msg->addPosition(pos);
@@ -3289,7 +3296,7 @@ void ProtocolGame::AddInventoryItem(OutputMessage_ptr msg, slots_t slot, const I
 	{
 		msg->addByte(0x78);
 		msg->addByte(slot);
-		msg->addItem(item, player);
+		msg->addItem(item);
 	}
 	else
 		RemoveInventoryItem(msg, slot);
@@ -3311,7 +3318,7 @@ void ProtocolGame::AddContainerItem(OutputMessage_ptr msg, uint8_t cid, const It
 {
 	msg->addByte(0x70);
 	msg->addByte(cid);
-	msg->addItem(item, player);
+	msg->addItem(item);
 }
 
 void ProtocolGame::UpdateContainerItem(OutputMessage_ptr msg, uint8_t cid, uint8_t slot, const Item* item)
@@ -3319,7 +3326,7 @@ void ProtocolGame::UpdateContainerItem(OutputMessage_ptr msg, uint8_t cid, uint8
 	msg->addByte(0x71);
 	msg->addByte(cid);
 	msg->addByte(slot);
-	msg->addItem(item, player);
+	msg->addItem(item);
 }
 
 void ProtocolGame::RemoveContainerItem(OutputMessage_ptr msg, uint8_t cid, uint8_t slot)
